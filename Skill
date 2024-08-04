@@ -1,0 +1,180 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+local Window = OrionLib:MakeWindow({Name = "Rng Fights", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+-- Main Tab
+local MainTab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+MainTab:AddLabel("Welcome to the Main Tab")
+
+local autoRollEnabled = false
+local autoRollConnection
+
+MainTab:AddToggle({
+    Name = "Auto Roll",
+    Default = false,
+    Callback = function(Value)
+        autoRollEnabled = Value
+        if autoRollEnabled then
+            autoRollConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                local args = {
+                    [1] = "naohh61",
+                    [2] = "Random"
+                }
+                game:GetService("ReplicatedStorage").EventsFolder.GenerateAttack:FireServer(unpack(args))
+            end)
+        else
+            if autoRollConnection then
+                autoRollConnection:Disconnect()
+                autoRollConnection = nil
+            end
+        end
+    end
+})
+
+MainTab:AddButton({
+    Name = "Get Item in Shop",
+    Callback = function()
+        local args = {
+            [1] = 1,
+            [2] = "Divine Power"
+        }
+        game:GetService("ReplicatedStorage").EventsFolder.ShopEvents.ShopEvent:FireServer(unpack(args))
+    end
+})
+
+MainTab:AddTextbox({
+    Name = "Get Custom Item Shop",
+    Default = "Divine Power",
+    TextDisappear = true,
+    Callback = function(Value)
+        local args = {
+            [1] = 1,
+            [2] = Value
+        }
+        game:GetService("ReplicatedStorage").EventsFolder.ShopEvents.ShopEvent:FireServer(unpack(args))
+    end
+})
+
+MainTab:AddButton({
+    Name = "Hitbox",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/RobloxScripts/main/HitboxExpander.lua"))()
+    end
+})
+
+local autoFarmEnabled = false
+local autoFarmConnection
+
+local function isPlayerDamageable(player)
+    return player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
+end
+
+local function getNextTarget()
+    local players = game:GetService("Players"):GetPlayers()
+    local localPlayer = game.Players.LocalPlayer
+
+    for _, player in pairs(players) do
+        if player ~= localPlayer and isPlayerDamageable(player) then
+            return player
+        end
+    end
+
+    return nil
+end
+
+local function teleportBehindPlayer(player)
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
+    end
+end
+
+local function autoFarm()
+    while autoFarmEnabled do
+        local targetPlayer = getNextTarget()
+        while targetPlayer and autoFarmEnabled do
+            if not isPlayerDamageable(targetPlayer) then
+                targetPlayer = getNextTarget()
+            else
+                teleportBehindPlayer(targetPlayer)
+                wait(0.001) -- Adjust the wait time as needed
+            end
+        end
+        wait(0.001)
+    end
+end
+
+MainTab:AddToggle({
+    Name = "Auto Farm(bug i need to fix)",
+    Default = false,
+    Callback = function(Value)
+        autoFarmEnabled = Value
+        if autoFarmEnabled then
+            autoFarmConnection = coroutine.wrap(autoFarm)()
+        end
+    end
+})
+
+-- Teleport Tab
+local TeleportTab = Window:MakeTab({
+    Name = "Teleport",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+TeleportTab:AddButton({
+    Name = "Teleport to Safe Zone",
+    Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1.9413342475891113, 39.599998474121094, 2.6074349880218506)
+    end
+})
+
+TeleportTab:AddButton({
+    Name = "Teleport to Shop",
+    Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-108.36434173583984, 3.7499983310699463, -142.5312957763672)
+    end
+})
+
+-- Misc Tab
+local MiscTab = Window:MakeTab({
+    Name = "Misc",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+MiscTab:AddButton({
+    Name = "Infinite Jump",
+    Callback = function()
+        local Player = game:GetService("Players").LocalPlayer
+        local UserInputService = game:GetService("UserInputService")
+        _G.JumpHeight = 50
+
+        UserInputService.JumpRequest:connect(function()
+            if Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
+                Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+                Player.Character.HumanoidRootPart.Velocity = Vector3.new(0, _G.JumpHeight, 0)
+            end
+        end)
+    end
+})
+
+MiscTab:AddTextbox({
+    Name = "WalkSpeed",
+    Default = "16",
+    TextDisappear = true,
+    Callback = function(Value)
+        local speed = tonumber(Value)
+        if speed then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+        else
+            print("Invalid WalkSpeed value")
+        end
+    end
+})
+
+OrionLib:Init()
