@@ -67,6 +67,13 @@ MainTab:AddButton({
     end
 })
 
+MainTab:AddButton({
+    Name = "Fling Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/obf_rTvXTs8F16D8D2oiLxZ62E1E9jT1we312yUyJr2h72Vwqr32l37rirU1S89hqRV7.lua.txt"))()
+    end
+})
+
 local autoFarmEnabled = false
 local autoFarmConnection
 
@@ -101,15 +108,15 @@ local function autoFarm()
                 targetPlayer = getNextTarget()
             else
                 teleportBehindPlayer(targetPlayer)
-                wait(0.001) -- Adjust the wait time as needed
+                wait(1) -- Adjust the wait time as needed
             end
         end
-        wait(0.001)
+        wait(1)
     end
 end
 
 MainTab:AddToggle({
-    Name = "Auto Farm(bug i need to fix)",
+    Name = "Auto Farm",
     Default = false,
     Callback = function(Value)
         autoFarmEnabled = Value
